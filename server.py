@@ -186,7 +186,10 @@ def payment_accept(handler, resource, description):
         "payTo": RECEIVING if SALES_ENABLED else ZERO,
         "maxTimeoutSeconds": 300,
         "asset": USDC_BASE,
-        "extra": {"name": "USDC", "version": "2"},
+        # EIP-712 domain MUST match Base USDC's on-chain DOMAIN_SEPARATOR:
+        # name="USD Coin", version="2". Advertising "USDC" produces signatures
+        # that transferWithAuthorization rejects — blocks all stock x402 buyers.
+        "extra": {"name": "USD Coin", "version": "2"},
     }
 
 def x402_terms(handler, resource, description):
@@ -205,7 +208,7 @@ def paywall_headers(handler, body):
         "resource": body["x402"]["accepts"][0]["resource"],
         "description": body["x402"]["accepts"][0]["description"],
         "mimeType": "application/json", "payTo": body["x402"]["accepts"][0]["payTo"],
-        "maxTimeoutSeconds": 300, "asset": USDC_BASE, "extra": {"name": "USDC", "version": "2"}}]}
+        "maxTimeoutSeconds": 300, "asset": USDC_BASE, "extra": {"name": "USD Coin", "version": "2"}}]}
     terms_b64_v1 = base64.b64encode(json.dumps(terms_v1).encode()).decode()
     return {"PAYMENT-REQUIRED": terms_b64_v2, "X-PAYMENT-REQUIRED": terms_b64_v1}
 
